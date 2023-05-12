@@ -13,7 +13,7 @@ def get_directory_size(directory):
     return total_size
 
 
-def show_top_level_directories(root_directory):
+def get_top_level_dir_sizes(root_directory):
     directory_list = []
     pbar = tqdm(os.listdir(root_directory), desc='Top-level Directories')
     for item in pbar:
@@ -41,5 +41,5 @@ root_directory = config.get('Directories', 'root_directory')
 
 csv_filename = "directory_sizes.csv"
 
-directory_list = show_top_level_directories(root_directory)
+directory_list = get_top_level_dir_sizes(root_directory)
 export_to_csv(directory_list, csv_filename)
