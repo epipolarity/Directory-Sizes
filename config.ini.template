@@ -1,0 +1,5 @@
+; rename this file to config.ini and
+; set the path to your root directory here
+
+[Directories]
+root_directory = /path/to/root/directory
