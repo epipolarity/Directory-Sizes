@@ -3,3 +3,4 @@
 
 [Directories]
 root_directory = /path/to/root/directory
+ignore_directories = dir1, dir2, dir3
