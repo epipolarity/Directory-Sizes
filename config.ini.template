@@ -1,6 +1,13 @@
 ; rename this file to config.ini and
 ; set the path to your root directory here
-
 [Directories]
 root_directory = /path/to/root/directory
 ignore_directories = dir1, dir2, dir3
+
+; if check_for_write_access = True then only returns folders with permission to write
+[Access]
+check_for_write_access = False
+
+; min_dir_size in GB = smallest directory size to show in output - all are still written to csv
+[Filters]
+min_dir_size = 0
