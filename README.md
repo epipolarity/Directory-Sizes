@@ -2,7 +2,7 @@
 Create a nice simple CSV list of top level directory sizes
 
 # Usage
-Rename config.ini.template to config.ini and change root_directory to the directory you want to analyse.
+Rename config.ini.template to config.ini and change root_directory to the directory you want to analyse. Specify names of top level folders to ignore. Specify whether to only iterrogate folders to which you have write access. Specify a minimum directory size in GB for console output (0=output all).
 
 Run python sizes.py
 
