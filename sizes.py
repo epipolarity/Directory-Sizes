@@ -42,7 +42,10 @@ def get_top_level_dir_sizes(root_directory, ignore_directories, check_write, min
             directory_list.append(csv_row)
             if directory_size / (1024 ** 3) > min_dir_size:
                 formatted_size = locale.format_string('%0.2f', directory_size / (1024 ** 3), grouping=True)
-                tqdm.write(formatted_size + " -> " + item + " write:{}".format(write_access))
+                output_str = formatted_size + "GB -> " + item 
+                if check_write:
+                    output_str += " write:{}".format(write_access)
+                tqdm.write(output_str)
     return directory_list
 
 
