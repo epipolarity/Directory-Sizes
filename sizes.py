@@ -4,16 +4,23 @@ from tqdm import tqdm
 from configparser import ConfigParser
 import locale
 import time
+import logging
 
 def get_directory_size(directory, pbar):
     total_size = 0
     file_count = 0
+    errors = 0
     last_update = time.time()
     for dirpath, dirnames, filenames in os.walk(directory):
         for file in filenames:
             file_count += 1
             filepath = os.path.join(dirpath, file)
-            total_size += os.path.getsize(filepath)
+            try:
+                total_size += os.path.getsize(filepath)
+            except Exception as ex:
+                errors += 1
+                logging.error(filepath)
+                logging.exception(ex)
             if time.time() - last_update >= 1:
                 pbar.set_postfix(update="{} files".format(file_count))
                 last_update = time.time()
@@ -61,6 +68,7 @@ def export_to_csv(directory_list, csv_filename):
 
 
 locale.setlocale(locale.LC_ALL, '')
+logging.basicConfig(filename='example.log', filemode='w', level=logging.DEBUG, encoding='utf-8')
 
 # Read the root_directory from the config.ini file
 config = ConfigParser()
