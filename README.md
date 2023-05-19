@@ -5,8 +5,11 @@ Create a nice simple CSV list of top level directory sizes
 - Rename config.ini.template to config.ini
 - Change root_directory to the directory you want to analyse.
 - Specify names of top level folders to ignore, separated by commas
+- Specify number of threads to use - seems to work best when equal to number of physical cores
 - Specify whether to only iterrogate folders to which you have write access.
 - Specify a minimum directory size in GB for console output (0=output all).
+- Specify the csv file to generate
+- Specify whether to report in bytes, gigabytes or both
 
 Run python sizes.py
 
@@ -14,5 +17,6 @@ This will use os.walk on all directories within the top level of the specified '
 
 Results are saved to directory_sizes.csv in the current directory, and contain columns for
 1. Directory name
-2. Size (bytes)
-3. Size (gigabytes)
+2. Size (bytes) (optional)
+3. Size (gigabytes) (optional)
+4. Write Access (optional)
