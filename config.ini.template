@@ -1,8 +1,12 @@
-; rename this file to config.ini and
-; set the path to your root directory here
+; rename this file to config.ini
+
+; full path to directory to scan, and names of top level subdirectories to ignore, comma separated
 [Directories]
 root_directory = /path/to/root/directory
 ignore_directories = dir1, dir2, dir3
+
+[Performance]
+num_threads = 10
 
 ; if check_for_write_access = True then only returns folders with permission to write
 [Access]
@@ -11,3 +15,8 @@ check_for_write_access = False
 ; min_dir_size in GB = smallest directory size to show in output - all are still written to csv
 [Filters]
 min_dir_size = 0
+
+[Reporting]
+csv_file = directory_sizes.csv
+bytes = False
+gigabytes = True
