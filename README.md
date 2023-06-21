@@ -11,6 +11,7 @@ Create a nice simple CSV list of top level directory sizes
 - Specify the csv file to generate
 - Specify whether to report in bytes, gigabytes or both
 - Specify whether to report count of files
+- Specify whether to report (in terminal, not csv) paths above a certain length... -1 to ignore path length
 
 Run python sizes.py
 
