@@ -26,37 +26,43 @@ def calculate_file_size(filepath):
         return 0
     
 
-def get_directory_size(directory, pbar, num_threads):
+def get_directory_size(directory, pbar, num_threads, path_len_threshold):
     """
     Retrieves the total size and number of files in the specified directory.
     Args:
         directory (str): The path to the directory.
         pbar (ProgressBar): An instance of the progress bar for displaying updates.
         num_threads (int): The number of threads to use for concurrent file size calculation.
+        path_len_threshold: Threshold for path length, over which to report the file path. -1 = no reporting
     Returns:
         tuple: A tuple containing the total size (in bytes) and the number of files.
+        list: A list of paths with length exceeding the threshold
     """
     total_size = 0
     last_update = time.time()
+    long_paths = []
+
     with ThreadPoolExecutor(max_workers=num_threads) as executor:
-        futures = []
+        size_futures = []
         for dirpath, dirnames, filenames in os.walk(directory):
             for filename in filenames:
                 filepath = os.path.join(dirpath, filename)
-                futures.append(executor.submit(calculate_file_size, filepath))
+                if path_len_threshold >= 0 and len(filepath) > 255:
+                    long_paths.append(filepath)
+                size_futures.append(executor.submit(calculate_file_size, filepath))
                 if time.time()-last_update > 1:
                     last_update = time.time()
-                    pbar.set_postfix(update=f"Found {format_thousands(len(futures))} files")
+                    pbar.set_postfix(update=f"Found {format_thousands(len(size_futures))} files")
         
-        pbar.set_postfix(update=f"Found {format_thousands(len(futures))} files")
-        for future in futures:
+        pbar.set_postfix(update=f"Found {format_thousands(len(size_futures))} files")
+        for future in size_futures:
             total_size += future.result()
             if time.time()-last_update > 1:
                 last_update = time.time()
                 pbar.set_postfix(update=f"Found {format_gigabytes(total_size)} gigabytes")
 
     pbar.set_postfix(update=f"Found {format_gigabytes(total_size)} gigabytes")
-    return total_size, len(futures)
+    return total_size, len(size_futures), long_paths
 
 
 def folder_writable(folder_path):
@@ -107,6 +113,7 @@ def get_top_level_dir_sizes(config):
         config (dict): A dictionary containing the configuration parameters.
     Returns:
         list: A list of rows containing information about each top-level directory.
+        list: A list of paths exceeding config path len threshold for path length.
     """
     root_directory = config['root_directory']
     check_write = config['check_write']
@@ -121,7 +128,7 @@ def get_top_level_dir_sizes(config):
             if check_write:
                 write_access = folder_writable(full_path)
             if write_access or not check_write:
-                directory_size, file_count = get_directory_size(full_path, pbar, config['num_threads'])
+                directory_size, file_count, long_paths = get_directory_size(full_path, pbar, config['num_threads'], config['path_len_threshold'])
                 csv_row = csv_data_row(config, toplevel_subdir, directory_size, file_count, write_access)
                 directory_sizes.append(csv_row)
                 if directory_size / (1024 ** 3) >= config['min_dir_size']:
@@ -129,7 +136,7 @@ def get_top_level_dir_sizes(config):
                     if check_write:
                         output_str += " write:{}".format(write_access)
                     tqdm.write(output_str)
-    return directory_sizes
+    return directory_sizes, long_paths
 
 
 def top_level_subdir_names(root_directory, config):
@@ -246,6 +253,7 @@ def get_config():
         config['report_gb'] = config_reader.getboolean('Reporting', 'gigabytes')
         config['report_fcount'] = config_reader.getboolean('Reporting', 'filecount')
         config['csv_file'] = config_reader.get('Reporting', 'csv_file')
+        config['path_len_threshold'] = int(config_reader.get('Reporting', 'paths_over_len'))
 
         # Performance Section
         if 'Performance' not in config_reader:
@@ -264,7 +272,9 @@ logging.basicConfig(filename='error.log', filemode='w', level=logging.DEBUG, enc
 
 try:
     config_ini = get_config()
-    directory_list = get_top_level_dir_sizes(config_ini)
+    directory_list, long_paths = get_top_level_dir_sizes(config_ini)
+    for lp in long_paths:
+        print(f"{len(lp)}: {lp}")
     export_to_csv(directory_list, config_ini)
 except FileNotFoundError:
     print("The 'config.ini' file was not found.")

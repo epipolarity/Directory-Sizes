@@ -21,3 +21,4 @@ csv_file = directory_sizes.csv
 bytes = False
 gigabytes = True
 filecount = True
+paths_over_len = 255
