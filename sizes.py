@@ -3,6 +3,7 @@ import csv
 import locale
 import time
 import logging
+import re
 
 from tqdm import tqdm
 from configparser import ConfigParser
@@ -142,15 +143,18 @@ def get_top_level_dir_sizes(config):
 def top_level_subdir_names(root_directory, config):
     """
     Retrieves the names of the top-level subdirectories within the specified root directory,
-    excluding directories listed in config to specifically ignore
+    excluding directories listed in config to specifically ignore, and matching any
+    regular expression provided in config
     Args:
         root_directory (str): The path to the root directory.
-        config (dict): A dictionary containing the configuration parameters.
+        config (dict): A dictionary containing the configuration parameters.        
     Returns:
         list: A list of names of the top-level subdirectories.
     """
     _, dirnames, _ = next(os.walk(root_directory))
     dirnames = [d for d in dirnames if d not in config['ignore_directories']]
+    if config['re_pattern']:
+        dirnames = [d for d in dirnames if re.match(config['re_pattern'], d)]    
     return dirnames
 
 
@@ -232,6 +236,7 @@ def get_config():
 
         ignore_directories = config_reader.get('Directories', 'ignore_directories')
         config['ignore_directories'] = [directory.strip() for directory in ignore_directories.split(',')]
+        config['re_pattern'] = config_reader.get('Directories', 'top_level_regex')
 
         # Access Section
         if 'Access' not in config_reader:
